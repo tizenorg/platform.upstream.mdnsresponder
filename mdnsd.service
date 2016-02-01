@@ -1,0 +1,9 @@
+[Unit]
+Description=DNS Service Discovery mDNSResponder
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/mdnsd -debug
+
+[Install]
+WantedBy=multi-user.target

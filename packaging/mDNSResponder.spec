@@ -38,6 +38,10 @@ mkdir -p %{buildroot}%{_sbindir}/
 mkdir -p %{buildroot}%{_bindir}/
 mkdir -p %{buildroot}%{_libdir}/
 mkdir -p %{buildroot}%{_libdir}/pkgconfig/
+mkdir -p %{buildroot}%{_libdir}/systemd/system/
+cp mdnsd.service %{buildroot}%{_libdir}/systemd/system/mdnsd.service
+mkdir -p %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants/
+ln -s mdnsd.service %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants/mdnsd.service
 mkdir -p %{buildroot}%{_includedir}/
 cd mDNSPosix
 make install os=tizen DESTDIR=%{buildroot}
@@ -54,6 +58,8 @@ ln -sf %{_libdir}/libdns_sd.so.1 %{buildroot}%{_libdir}/libdns_sd.so
 %{_bindir}/dns-sd
 %{_libdir}/libdns_sd.so*
 %attr(644,-,-) %{_libdir}/pkgconfig/*.pc
+%attr(644,-,-) %{_libdir}/systemd/system/mdnsd.service
+%attr(644,-,-) %{_libdir}/systemd/system/multi-user.target.wants/mdnsd.service
 
 %files devel
 %attr(644,-,-) %{_includedir}/*.h
