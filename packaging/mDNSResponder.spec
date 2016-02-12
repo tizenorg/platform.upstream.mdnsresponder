@@ -44,7 +44,7 @@ mkdir -p %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants/
 ln -s mdnsd.service %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants/mdnsd.service
 mkdir -p %{buildroot}%{_includedir}/
 cd mDNSPosix
-make install os=tizen DESTDIR=%{buildroot}
+make install os=tizen DESTDIR=%{buildroot} LIBDIR=/%{?_lib}
 ln -sf %{_libdir}/libdns_sd.so.1 %{buildroot}%{_libdir}/libdns_sd.so
 
 %post -p /sbin/ldconfig
