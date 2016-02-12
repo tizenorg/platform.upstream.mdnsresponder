@@ -46,10 +46,11 @@ build:
 	mkdir build
 
 build/dns-sd: build dns-sd.c ClientCommon.c
-	$(CC) $(filter %.c %.o, $+) $(LIBS) -I../mDNSShared -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include/ -lglib-2.0 -Wall -o $@
+	$(CC) $(filter %.c %.o, $+) $(LIBS) -I../mDNSShared $(shell pkg-config --cflags --libs glib-2.0) -Wall -o $@
 
 build/dns-sd64: build dns-sd.c ClientCommon.c
-	$(CC) $(filter %.c %.o, $+) $(LIBS) -I../mDNSShared -Wall -o $@ -m64
+	$(CC) $(filter %.c %.o, $+) $(LIBS) -I../mDNSShared $(shell pkg-config --cflags --libs glib-2.0) -Wall -o $@ -m64
+
 
 # Note, we can make a 'fat' version of dns-sd using 'lipo', as shown below, but we
 # don't, because we don't want or need a 'fat' version of dns-sd, because it will

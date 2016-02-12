@@ -1,0 +1,12 @@
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib
+includedir=/usr/include/
+
+Name: dns_sd
+Description: @PACKAGE_DESCRIPTION@
+Version: 576.30.4
+Requires: glib-2.0
+Libs: -L${libdir} -ldns_sd
+Cflags: -I${includedir}
+

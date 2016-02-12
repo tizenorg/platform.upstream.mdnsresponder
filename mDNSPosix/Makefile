@@ -48,7 +48,7 @@
 
 #############################################################################
 
-LIBVERS = 1
+LIBVERS = 576.30.4
 
 COREDIR = ../mDNSCore
 SHAREDDIR ?= ../mDNSShared
@@ -156,7 +156,7 @@ JAVACFLAGS_OS = -dynamiclib -I/System/Library/Frameworks/JavaVM.framework/Header
 else
 
 ifeq ($(os),tizen)
-CFLAGS_OS = -D_GNU_SOURCE -DHAVE_IPV6 -DNOT_HAVE_SA_LEN -DUSES_NETLINK -DHAVE_LINUX -DTARGET_OS_LINUX -DTIZEN_EXT -fno-strict-aliasing -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include/ -lglib-2.0
+CFLAGS_OS = -D_GNU_SOURCE -DHAVE_IPV6 -DNOT_HAVE_SA_LEN -DUSES_NETLINK -DHAVE_LINUX -DTARGET_OS_LINUX -DTIZEN_EXT -fno-strict-aliasing $(shell pkg-config --cflags --libs glib-2.0)
 LD = $(CC) -shared
 FLEXFLAGS_OS = -l
 INSTBASE = $(DESTDIR)/usr
@@ -227,7 +227,7 @@ CFLAGS = $(CFLAGS_COMMON) $(CFLAGS_OS) $(CFLAGS_DEBUG)
 all: setup Daemon libdns_sd SAClient SAResponder SAProxyResponder Identify NetMonitor dnsextd $(OPTIONALTARG)
 
 #install: setup InstalledDaemon InstalledStartup InstalledLib InstalledManPages InstalledClients $(OPTINSTALL)
-install: setup InstalledDaemon InstalledLib Clients InstalledClients $(OPTINSTALL)
+install: setup InstalledDaemon InstalledLib $(OPTINSTALL)
 
 # 'setup' sets up the build directory structure the way we want
 setup:
@@ -290,7 +290,7 @@ $(BUILDDIR)/$(NSSLIBFILE): $(CLIENTLIBOBJS) $(OBJDIR)/nss_mdns.c.so.o
 InstalledDaemon: $(INSTBASE)/sbin/mdnsd
 	@echo $+ " installed"
 
-InstalledLib: $(INSTBASE)/lib/libdns_sd.$(LDSUFFIX).$(LIBVERS) $(INSTBASE)/include/dns_sd.h $(INSTBASE)/lib/pkgconfig/mDNSResponder.pc
+InstalledLib: $(INSTBASE)$(LIBDIR)/libdns_sd.$(LDSUFFIX).$(LIBVERS) $(INSTBASE)/include/dns_sd.h $(INSTBASE)$(LIBDIR)/pkgconfig/dns_sd.pc
 	@echo $+ " installed"
 
 InstalledStartup: $(STARTUPSCRIPTDIR)/$(STARTUPSCRIPTNAME)
@@ -310,9 +310,9 @@ $(INSTBASE)/sbin/mdnsd: $(BUILDDIR)/mdnsd
 	@if test -x $@; then $(STARTUPSCRIPTDIR)/$(STARTUPSCRIPTNAME) stop; fi
 	$(CP) $< $@
 
-$(INSTBASE)/lib/libdns_sd.$(LDSUFFIX).$(LIBVERS): $(BUILDDIR)/libdns_sd.$(LDSUFFIX)
+$(INSTBASE)$(LIBDIR)/libdns_sd.$(LDSUFFIX).$(LIBVERS): $(BUILDDIR)/libdns_sd.$(LDSUFFIX)
 	$(CP) $< $@
-	$(LN) $@ $(INSTBASE)/lib/libdns_sd.$(LDSUFFIX)
+	$(LN) $@ $(INSTBASE)$(LIBDIR)/libdns_sd.$(LDSUFFIX)
 ifdef LDCONFIG
     # -m means 'merge into existing database', -R means 'rescan directories'
 	$(LDCONFIG) -mR
@@ -320,9 +320,16 @@ endif
 
 $(INSTBASE)/include/dns_sd.h: $(SHAREDDIR)/dns_sd.h
 	$(CP) $< $@
-
-$(INSTBASE)/lib/pkgconfig/mDNSResponder.pc: ../mDNSResponder.pc.in
+ifdef CONFIG_TIZEN_64BIT
+$(warning 64bit build)
+$(INSTBASE)$(LIBDIR)/pkgconfig/dns_sd.pc: ../pkgconfig/lib64/dns_sd.pc.in
 	$(CP) $< $@
+else
+$(warning 32bit build)
+$(INSTBASE)$(LIBDIR)/pkgconfig/dns_sd.pc: ../pkgconfig/lib/dns_sd.pc.in
+	$(CP) $< $@
+endif
+
 
 # We make this target dependent on $(INSTBASE)/sbin/mdnsd because we need to ensure
 # that the daemon is installed *before* we try to execute the command to start it.

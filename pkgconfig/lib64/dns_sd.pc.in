@@ -1,15 +1,15 @@
 
 # Package Information for pkg-config
 
-prefix=@PREFIX@
+prefix=/usr
 exec_prefix=/usr
-libdir=/usr/lib
+libdir=/usr/lib64
 includedir=/usr/include/
 
-Name: mDNSResponder
+Name: dns_sd
 Description: @PACKAGE_DESCRIPTION@
-Version: @VERSION@
-Requires: @PC_REQUIRED@
+Version: 576.30.4
+Requires: glib-2.0
 Libs: -L${libdir} -ldns_sd
 Cflags: -I${includedir}
 
