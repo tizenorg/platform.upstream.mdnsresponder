@@ -70,10 +70,10 @@ ln -sf %{_libdir}/libdns_sd.so.%{version} %{buildroot}%{_libdir}/libdns_sd.so
 systemctl daemon-reload
 
 if [ $1 = 1 ]; then
-    systemctl enable %{name}.service
+    systemctl enable mdnsd.service
 fi
 
-systemctl restart %{name}.service
+systemctl restart mdnsd.service
 
 %preun
 if [ $1 = 0 ]; then
@@ -87,6 +87,7 @@ fi
 
 %files
 %manifest mdnsresponder.manifest
+%license LICENSE
 %attr(755,root,root) %{_sbindir}/mdnsd
 %attr(-,root,root) %{_libdir}/systemd/system/mdnsd.service
 %attr(-,root,root) %{_libdir}/systemd/system/multi-user.target.wants/mdnsd.service
@@ -98,4 +99,5 @@ fi
 
 %files -n libdns_sd
 %manifest libdns_sd.manifest
+%license LICENSE
 %{_libdir}/libdns_sd.so*
