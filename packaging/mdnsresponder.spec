@@ -19,6 +19,7 @@ zero-configuration networking(ZEROCONF).
 
 %package -n libdns_sd
 Summary:    DNS-SD - client libraries
+Provides: libdns_sd.so
 Requires:   mdnsresponder = %{version}-%{release}
 
 %description -n libdns_sd
