@@ -19,7 +19,11 @@ zero-configuration networking(ZEROCONF).
 
 %package -n libdns_sd
 Summary:    DNS-SD - client libraries
+%if "%{?_lib}" == "lib64"
+Provides: libdns_sd.so()(64bit)
+%else
 Provides: libdns_sd.so
+%endif
 Requires:   mdnsresponder = %{version}-%{release}
 
 %description -n libdns_sd
