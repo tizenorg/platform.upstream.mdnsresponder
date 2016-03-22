@@ -3,7 +3,7 @@ Summary:    DNS Service Discovery service with dns-sd library
 Version:    576.30.4
 Release:    1
 Group:      System/Network
-License:    Apache-2.0
+License:    Apache-2.0 or BSD-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1001:    mdnsresponder.manifest
 Source1002:    libdns_sd.manifest
