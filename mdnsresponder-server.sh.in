@@ -1,0 +1,38 @@
+#!/bin/sh
+program="mdnsd"
+target=`/bin/ps -eo comm|/bin/grep ${program}`
+
+start_mdnsd()
+{
+	if [ "X${target}" == "X" ]; then
+		echo "${program} is not running"
+		echo "Launching ${program}"
+		/usr/sbin/${program}
+#		/bin/sleep 1
+	else
+		echo "${program} is already running"
+	fi
+}
+
+stop_mdnsd()
+{
+	if [ "X${target}" == "X" ]; then
+		echo "${program} is not running"
+	else
+		echo "${program} is running.. Killing it"
+		/usr/bin/pkill -x ${program}
+	fi
+}
+
+case $1 in
+"start")
+start_mdnsd
+;;
+"stop")
+stop_mdnsd
+;;
+*)
+/bin/echo mdnsd-server.sh [start/stop]
+exit 1
+;;
+esac

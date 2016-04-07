@@ -64,6 +64,8 @@ mkdir -p %{buildroot}%{_libdir}/pkgconfig/
 #mkdir -p %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants/
 #ln -s mdnsd.service %{buildroot}%{_libdir}/systemd/system/multi-user.target.wants/mdnsd.service
 
+cp mdnsresponder-server.sh.in %{buildroot}%{_bindir}/mdnsresponder-server.sh
+
 mkdir -p %{buildroot}%{_includedir}/
 %if "%{?_lib}" == "lib64"
 CONFIG_TIZEN_64BIT=y; export CONFIG_TIZEN_64BIT
@@ -73,7 +75,8 @@ make install os=tizen DESTDIR=%{buildroot} LIBDIR=/%{?_lib}
 ln -sf %{_libdir}/libdns_sd.so.%{version} %{buildroot}%{_libdir}/libdns_sd.so.576
 ln -sf %{_libdir}/libdns_sd.so.%{version} %{buildroot}%{_libdir}/libdns_sd.so
 
-#%post
+%post
+chmod 755 %{_bindir}/mdnsresponder-server.sh
 #systemctl daemon-reload
 
 #if [ $1 = 1 ]; then
@@ -96,6 +99,7 @@ ln -sf %{_libdir}/libdns_sd.so.%{version} %{buildroot}%{_libdir}/libdns_sd.so
 %manifest mdnsresponder.manifest
 %license LICENSE
 %attr(755,root,root) %{_sbindir}/mdnsd
+%attr(-,root,root) %{_bindir}/mdnsresponder-server.sh
 #%attr(-,root,root) %{_libdir}/systemd/system/mdnsd.service
 #%attr(-,root,root) %{_libdir}/systemd/system/multi-user.target.wants/mdnsd.service
 
