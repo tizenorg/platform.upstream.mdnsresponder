@@ -2653,8 +2653,6 @@ struct CompileTimeAssertionChecks_DNS_SD
     char assert0[(sizeof(union _TXTRecordRef_t) == 16) ? 1 : -1];
 };
 
-DNSServiceErrorType DNSSD_API DNSServiceHandleEvents(DNSServiceRef *sdRef);
-
 #ifdef  __cplusplus
 }
 #endif

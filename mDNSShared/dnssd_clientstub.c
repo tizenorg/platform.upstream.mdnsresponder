@@ -29,9 +29,6 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#if defined TIZEN_EXT
-#include<glib.h>
-#endif
 #if APPLE_OSX_mDNSResponder
 #include <mach-o/dyld.h>
 #include <uuid/uuid.h>
@@ -161,9 +158,6 @@ struct _DNSServiceRef_t
     dispatch_queue_t disp_queue;
 #endif
     void             *kacontext;
-#if defined TIZEN_EXT
-    uint32_t watch_id;                        // event source id of GIOChannel
-#endif
 };
 
 struct _DNSRecordRef_t
@@ -511,9 +505,6 @@ static DNSServiceErrorType ConnectToServer(DNSServiceRef *ref, DNSServiceFlags f
     sdr->disp_queue    = NULL;
 #endif
     sdr->kacontext     = NULL;
-#if defined TIZEN_EXT
-    sdr->watch_id      = 0;
-#endif
 
     if (flags & kDNSServiceFlagsShareConnection)
     {
@@ -1131,10 +1122,6 @@ void DNSSD_API DNSServiceRefDeallocate(DNSServiceRef sdRef)
         // is cancelled only when the mDNSResponder daemon dies
         else if (!sdRef->disp_queue) dnssd_close(sdRef->sockfd);
 #else
-#if defined TIZEN_EXT
-        if (sdRef->watch_id > 0)
-            g_source_remove(sdRef->watch_id);
-#endif
         dnssd_close(sdRef->sockfd);
 #endif
         // Free DNSRecords added in DNSRegisterRecord if they have not
@@ -2379,57 +2366,6 @@ DNSServiceErrorType DNSSD_API DNSServiceSleepKeepalive
         return err;
     }
     (*sdRef)->kacontext = ka;
-    return kDNSServiceErr_NoError;
-}
-#endif
-
-#if defined TIZEN_EXT
-static gboolean dns_service_process_result(GIOChannel *source,
-                     GIOCondition condition, gpointer data)
-{
-    DNSServiceRef *client = data;
-    DNSServiceErrorType err;
-
-    (void)source;        //Unused
-    if(*client == NULL)
-        return FALSE;
-
-    switch (condition) {
-        case G_IO_IN:
-                err = DNSServiceProcessResult(*client);
-                if (err) {
-                    syslog(LOG_WARNING, "DNSServiceProcessResult returned %d", err);
-                    return FALSE;
-                }
-                return TRUE;
-        case G_IO_HUP:
-                syslog(LOG_WARNING, "G_IO_HUP event received.");
-                break;
-        case G_IO_ERR:
-                syslog(LOG_WARNING, "G_IO_ERR event received.");
-                break;
-        case G_IO_NVAL:
-                syslog(LOG_WARNING, "G_IO_NVAL event received.");
-                break;
-        default:
-                syslog(LOG_WARNING, "Unknown event received.");
-                break;
-    }
-    return FALSE;
-}
-
-DNSServiceErrorType DNSSD_API DNSServiceHandleEvents(DNSServiceRef *sdRef)
-{
-    GIOChannel *sock_io = NULL;
-    int dns_sd_fd = (*sdRef)->sockfd;
-
-    sock_io = g_io_channel_unix_new(dns_sd_fd);
-    g_io_channel_set_flags(sock_io, G_IO_FLAG_NONBLOCK, NULL);
-    g_io_channel_set_close_on_unref(sock_io, TRUE);
-    (*sdRef)->watch_id = g_io_add_watch(sock_io, (G_IO_IN | G_IO_HUP |
-                           G_IO_ERR | G_IO_NVAL), dns_service_process_result,
-                           sdRef);
-    g_io_channel_unref(sock_io);
     return kDNSServiceErr_NoError;
 }
 #endif
