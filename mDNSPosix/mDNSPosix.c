@@ -1067,6 +1067,29 @@ mDNSlocal void      PrintNetLinkMsg(const struct nlmsghdr *pNLMsg)
 }
 #endif
 
+#if defined TIZEN_EXT
+static int extract_link(struct ifinfomsg *msg, int bytes, const char **ifname, unsigned char *operstate)
+{
+        struct rtattr *attr;
+
+        for (attr = IFLA_RTA(msg); RTA_OK(attr, bytes); attr = RTA_NEXT(attr, bytes)) {
+                switch (attr->rta_type) {
+                case IFLA_IFNAME:
+                        *ifname = RTA_DATA(attr);
+                        break;
+                case IFLA_OPERSTATE:
+                        *operstate = *((unsigned char *) RTA_DATA(attr));
+                        break;
+                case IFLA_WIRELESS:
+                        /* Ignore RTM_NEWLINK with IFLA_WIRELESS */
+                        return 0;
+                }
+        }
+
+        return 1;
+}
+#endif
+
 mDNSlocal mDNSu32       ProcessRoutingNotification(int sd)
 // Read through the messages on sd and if any indicate that any interface records should
 // be torn down and rebuilt, return affected indices as a bitmask. Otherwise return 0.
@@ -1075,6 +1098,10 @@ mDNSlocal mDNSu32       ProcessRoutingNotification(int sd)
     char buff[4096];
     struct nlmsghdr         *pNLMsg = (struct nlmsghdr*) buff;
     mDNSu32 result = 0;
+#if defined TIZEN_EXT
+    unsigned char operstate = 0xff;
+    const char *ifname = NULL;
+#endif
 
     // The structure here is more complex than it really ought to be because,
     // unfortunately, there's no good way to size a buffer in advance large
@@ -1106,6 +1133,19 @@ mDNSlocal mDNSu32       ProcessRoutingNotification(int sd)
 
 #if MDNS_DEBUGMSGS
         PrintNetLinkMsg(pNLMsg);
+#endif
+
+#if defined TIZEN_EXT
+        if (pNLMsg->nlmsg_type == RTM_NEWLINK) {
+            struct ifinfomsg *msg = (struct ifinfomsg *) NLMSG_DATA(pNLMsg);
+
+            /* Check if RTM_NEWLINK contains IFLA_WIRELESS */
+            if (extract_link(msg, IFA_PAYLOAD(pNLMsg), &ifname, &operstate) == 0)
+                return result;
+#if MDNS_DEBUGMSGS
+            printf("Interface Name %s Operstate %d\n", ifname, operstate);
+#endif
+        }
 #endif
 
         // Process the NetLink message
