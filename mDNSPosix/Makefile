@@ -508,6 +508,7 @@ $(BUILDDIR)/mDNSNetMonitor:          $(SPECIALOBJ) $(OBJDIR)/NetMonitor.c.o
 
 $(OBJDIR)/NetMonitor.c.o:            $(COREDIR)/mDNS.c # Note: NetMonitor.c textually imports mDNS.c
 
+$(OBJDIR)/dnsextd_lexer.l.o:         $(OBJDIR)/dnsextd_parser.y.o
 $(BUILDDIR)/dnsextd:                 $(DNSEXTDOBJ) $(OBJDIR)/dnsextd.c.threadsafe.o
 	$(CC) $+ -o $@ $(LINKOPTS) $(LINKOPTS_PTHREAD)
 
